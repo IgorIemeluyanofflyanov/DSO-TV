@@ -2,273 +2,257 @@ unit uOSCTV;
 
 interface
 
-uses Windows, Classes,SysUtils, Forms, MMSystem, uOSCReader,Math, Dialogs;
+uses Windows, Classes, SysUtils, Forms, MMSystem, uOSCReader, Math, Dialogs,
+  vdsolib;
 
-type TRowEvent = procedure (var RowDataToFill : Pointer; RowNumber : Integer; var MaxX : DWORD; var RowVolts : PDoubleArray) of object;
-type TSynhroPulse = (spNone, spHSYN, spVSYN);
-type TOSCTVstatus = (osSetup,osProcessData, osWaitFirstFrame, osWaitNewFrame, osWaitEndRow, osWaitStartRowOrFrame);
-type TOnDebug  = procedure (NewOSCTVstatus : TOSCTVstatus; DebugStr : String) of object;
+type
+  TSynhroPulse = (spNone, spHSYN, spVSYN);
 
-type TOSCTV = class
-  private
-    FOnNewFrame: TNotifyEvent;
-    FOnNewRow: TRowEvent;
-    fOSCReader : TOSCReader;
-    fStatus    : TOSCTVstatus;
-    fBytesPerMicroSec  : Integer;
-    fCurrentPosInBytes : Int64;
-    fBytesInColor : Integer;
-    lastPossynhroNewFrameVoltage : Int64;
-    lastTimeSynhroPulse : Int64;
-    timeTolastTimeSynhroPulse : Int64;
-    synhroTimes : Integer;
-    VSYNcount : integer;
-    xPos : Integer;
-    RowNum : Integer;
-    FOnDebug: TOnDebug;
-    synhroVoltageLevel : Double;
-    lastPulseData  : Double;
-    aRowData : PByteArray;
-    MaxX : Dword;
-    lastRowsValues : PDoubleArray;
-    BuffProcess : integer;
- 
+function CurrentPosInMicroSec: Int64;
 
+function IsSynhroPulse(PulseData: Double): TSynhroPulse;
 
-    function  CurrentPosInMicroSec : Int64;
+procedure ChangeStat(aNewStat: TOSCTVstatus);
 
+procedure TOSCTV_Create;
 
-    function IsSynhroPulse (PulseData : Double):TSynhroPulse;
+function VoltToColor(Volt: Double): Byte;
+function StatusAsString(OSCTVstatus: TOSCTVstatus): String;
+procedure OnReadDataTV(aData: PDoubleArray; aSize: DWORD);
 
-    procedure ChangeStat (aNewStat : TOSCTVstatus);
-    procedure SetOnNewFrame(const Value: TNotifyEvent);
-    procedure SetOnNewRow(Value : TRowEvent);
-    procedure SetOnDebug(const Value: TOnDebug);
-
-
-  public
-
-  IsEvenFrame : Boolean;
-  DebugVoltage : Double;
-  MinVoltageLevel : Double;
-  MaxVoltageLevel : Double;
-  ColorVoltageGain : Double;
-  ColorVoltageDelta : Double;
-  DebugStr : string;
-  function  VoltToColor(Volt : Double) : Byte;
-  function  StatusAsString(OSCTVstatus : TOSCTVstatus) : String;
-  procedure OnReadData (aData : PDoubleArray; aSize : DWORD) ;
-  property  OnNewFrame : TNotifyEvent read FOnNewFrame write SetOnNewFrame;
-  property  OnNewRow   : TRowEvent read FOnNewRow write SetOnNewRow;
-  property  PositionInBytes : Int64 read fCurrentPosInBytes;
-  property  PositionInMicroSec : Int64 read CurrentPosInMicroSec;
-  property  OSCReader : TOSCReader read fOSCReader;
-  property  OnDebug : TOnDebug read FOnDebug write SetOnDebug;
-  property  Status :  TOSCTVstatus read fStatus;
-  constructor Create (OSCReader : TOSCReader);
-
-end;
+procedure OnNewFrame;
 
 implementation
 
+uses uOSCmain;
+
 { uOSCTV }
 
-
-
-procedure TOSCTV.ChangeStat(aNewStat: TOSCTVstatus);
+procedure OnNewFrame;
 begin
- // if Assigned(OnDebug) then
-//  OnDebug(aNewStat);
+  Inc(FormuOSCR.cnt);
+  FormuOSCR.img1.Repaint;
+  // Memo1.Lines.Add(Format('NewFrame %d; %d',[cnt,OSCTV.PositionInMicroSec]));
+end;
+
+procedure OnNewRow(var RowDataToFill: Pointer; RowNumber: Integer;
+  var MaxX: DWORD; var RowVolts: PDoubleArray);
+begin
+  if RowNumber < FormuOSCR.img1.Picture.Bitmap.Height then
+    RowDataToFill := FormuOSCR.img1.Picture.Bitmap.ScanLine[RowNumber];
+  MaxX := 1500;
+  RowVolts := nil;
+  {
+    if FrameDoubleArray[RowNumber] = nil then
+    GetMem(FrameDoubleArray[RowNumber],SizeOf(Double)*MaxX);
+
+    RowVolts := FrameDoubleArray[RowNumber];
+  }
+
+
+
+
+  // Memo1.Lines.Add(Format('%.8dR %.7f %d ',[OSCTV.PositionInMicroSec, OSCTV.DebugVoltage, MaxX]));
+  // img1.Picture.Bitmap.Width div 2;
+
+  // lbl1.Caption:=format('Min: %.3f; Max: %.3f',[OSCTV.MinVoltageLevel, OSCTV.MaxVoltageLevel]);
+
+  // img1.Repaint;
+  Application.ProcessMessages;
+  {
+    if MaxRow <  RowNumber then
+    begin
+    Memo1.Lines.Add(Format('New max row in %d usec; %d',[OSCTV.PositionInMicroSec, RowNumber]));
+    MaxRow:=RowNumber;
+    end;
+  }
+end;
+
+procedure ChangeStat(aNewStat: TOSCTVstatus);
+begin
   fStatus := aNewStat;
 end;
 
-constructor TOSCTV.Create(OSCReader: TOSCReader);
+procedure TOSCTV_Create;
 begin
-  fOSCReader := OSCReader;
-  fOSCReader.OnReadData := OnReadData;
   fStatus := osSetup;
-  fBytesPerMicroSec := fOSCReader.SampleRate div 1000000;
-  fCurrentPosInBytes:=0;
-  fBytesInColor:=3;
-  MinVoltageLevel:=0;
-  MaxVoltageLevel:=0;
-  lastTimeSynhroPulse      :=$FFFFFFFF;
-  timeTolastTimeSynhroPulse:=0;
-  synhroVoltageLevel:=-30;
-  aRowData:=0;
-  ColorVoltageGain :=3;
+  fBytesPerMicroSec := fSampleRate div 1000000;
+  fCurrentPosInBytes := 0;
+  fBytesInColor := 3;
+  MinVoltageLevel := 0;
+  MaxVoltageLevel := 0;
+  lastTimeSynhroPulse := $FFFFFFFF;
+  timeTolastTimeSynhroPulse := 0;
+  synhroVoltageLevel := -30;
+  aRowData := 0;
+  ColorVoltageGain := 3;
   ColorVoltageDelta := 3;
-  lastRowsValues:=nil;
+  lastRowsValues := nil;
 end;
 
-function TOSCTV.CurrentPosInMicroSec: Int64;
+function CurrentPosInMicroSec: Int64;
 begin
-  result:=fCurrentPosInBytes div fBytesPerMicroSec;
+  result := fCurrentPosInBytes div fBytesPerMicroSec;
 end;
 
-function TOSCTV.IsSynhroPulse(PulseData: Double): TSynhroPulse;
+function IsSynhroPulse(PulseData: Double): TSynhroPulse;
 begin
-  result:=spNone;
-  if dword(fStatus)<=0 then Exit;
+  result := spNone;
+  if DWORD(fStatus) <= 0 then
+    Exit;
 
   if (lastPulseData <= synhroVoltageLevel) then
-  Inc(synhroTimes);
+    Inc(synhroTimes);
 
-  if       (synhroTimes div fBytesPerMicroSec > 15)
-      and (lastPulseData > synhroVoltageLevel+0.1 ) then   // Pulse > 3us
+  if (synhroTimes div fBytesPerMicroSec > 15) and
+    (lastPulseData > synhroVoltageLevel + 0.1) then // Pulse > 3us
   begin
-   inc (VSYNcount);
+    Inc(VSYNcount);
     if (VSYNcount > 18) then
     begin
-    if Assigned(OnDebug) then
-     OnDebug(fStatus, format('VSYN %d %d',[timeTolastTimeSynhroPulse,synhroTimes]));
-     result:=spVSYN;
-     synhroTimes:=0;
-     VSYNcount:=0;
+      result := spVSYN;
+      synhroTimes := 0;
+      VSYNcount := 0;
     end;
   end;
 
-  if     (synhroTimes div fBytesPerMicroSec > 3)
-    and  (synhroTimes div fBytesPerMicroSec < 15)
-      and (lastPulseData > synhroVoltageLevel+0.1 ) then   // Pulse > 3us
+  if (synhroTimes div fBytesPerMicroSec > 3) and
+    (synhroTimes div fBytesPerMicroSec < 15) and
+    (lastPulseData > synhroVoltageLevel + 0.1) then // Pulse > 3us
   begin
-   if Assigned(OnDebug) then
-    OnDebug(fStatus, format('HSYN %d %d',[timeTolastTimeSynhroPulse,synhroTimes]));
-    result:=spHSYN;
-    synhroTimes:=0;
+    result := spHSYN;
+    synhroTimes := 0;
   end;
 
-  lastPulseData:=PulseData;
+  lastPulseData := PulseData;
 end;
 
-procedure TOSCTV.OnReadData(aData: PDoubleArray; aSize: DWORD);
+procedure OnReadDataTV(aData: PDoubleArray; aSize: DWORD);
 var
-  i : Integer;
-  aIsSynhroPulse : TSynhroPulse;
+  i: Integer;
+  aIsSynhroPulse: TSynhroPulse;
 begin
-    Inc(BuffProcess);
-    DebugStr:= IntToStr(BuffProcess);
-    //inherited;//(OnReadData) then  OnReadData (aData; aSize);
-   
-    i:=0;
-    aRowData:=nil;
-   while (i < aSize) do
-   begin
 
-     DebugVoltage:=aData[i];
-     if (MinVoltageLevel > aData[i]) then MinVoltageLevel := aData[i];
-     if (MaxVoltageLevel < aData[i]) then MaxVoltageLevel := aData[i];
+  DataIsReady := false;
 
+  Inc(BuffProcess);
+  DebugStr := IntToStr(BuffProcess);
+  // inherited;//(OnReadData) then  OnReadData (aData; aSize);
 
-    aIsSynhroPulse:= IsSynhroPulse (aData[i]);
+  i := 0;
+  aRowData := nil;
+  while (i < aSize) do
+  begin
 
-    if (dword(aIsSynhroPulse) > 0) then
-      lastTimeSynhroPulse      :=CurrentPosInMicroSec;
+    DebugVoltage := aData[i];
+    if (MinVoltageLevel > aData[i]) then
+      MinVoltageLevel := aData[i];
+    if (MaxVoltageLevel < aData[i]) then
+      MaxVoltageLevel := aData[i];
 
-    timeTolastTimeSynhroPulse:=CurrentPosInMicroSec - lastTimeSynhroPulse;
+    aIsSynhroPulse := IsSynhroPulse(aData[i]);
 
-    case  fStatus  of
-      osSetup          :  begin
-                            if CurrentPosInMicroSec > 500 then // wait 500us
-                            begin
-                            synhroVoltageLevel:=MinVoltageLevel+0.15;
-                             ChangeStat(osProcessData);
-                            end;
+    if (DWORD(aIsSynhroPulse) > 0) then
+      lastTimeSynhroPulse := CurrentPosInMicroSec;
 
-                          end;
-      osProcessData    :  case  aIsSynhroPulse of
-                          spNone : begin
-                                    if (Assigned(aRowData)) and (xPos < MaxX)  then
-                                    begin
-                                     aRowData[xPos]:=VoltToColor(aData[i]);
-                                      if lastRowsValues<>nil then
-                                      lastRowsValues[xPos]:=aData[i];
-                                     Inc(xPos);
-                                     end;
-                                   
-                                  end;
-                          spVSYN : begin
-                                    if Assigned(OnNewFrame) then
-                                     OnNewFrame(Self);
+    timeTolastTimeSynhroPulse := CurrentPosInMicroSec - lastTimeSynhroPulse;
 
-                                     IsEvenFrame:=not IsEvenFrame;
+    case fStatus of
+      osSetup:
+        begin
+          if CurrentPosInMicroSec > 500 then // wait 500us
+          begin
+            synhroVoltageLevel := MinVoltageLevel + 0.15;
+            ChangeStat(osProcessData);
+          end;
 
-                                     if IsEvenFrame then
-                                     RowNum:=0 else
-                                     RowNum:=1;
-                                     MaxX:=xPos;
+        end;
+      osProcessData:
+        case aIsSynhroPulse of
+          spNone:
+            begin
+              if (Assigned(aRowData)) and (xPos < MaxX) then
+              begin
+                aRowData[xPos] := VoltToColor(aData[i]);
+                if lastRowsValues <> nil then
+                  lastRowsValues[xPos] := aData[i];
+                Inc(xPos);
+              end;
 
-                                     if Assigned(OnNewRow) then
-                                     begin
-                                       OnNewRow(Pointer(aRowData), RowNum, MaxX,lastRowsValues);
-                                     end;
-                                      xPos:=0;
-                                    end;
-                          spHSYN : begin
-                                     RowNum:=RowNum+2;
+            end;
+          spVSYN:
+            begin
 
-                                     MaxX:=xPos;
+              OnNewFrame;
 
-                                     if Assigned(OnNewRow) then
-                                     begin
-                                       OnNewRow(Pointer(aRowData), RowNum,MaxX,lastRowsValues);
-                                     end;
+              IsEvenFrame := not IsEvenFrame;
 
-                                     xPos:=0;
-                                    end;
-                          end;          
+              if IsEvenFrame then
+                RowNum := 0
+              else
+                RowNum := 1;
+              MaxX := xPos;
+
+              begin
+                OnNewRow(Pointer(aRowData), RowNum, MaxX, lastRowsValues);
+              end;
+              xPos := 0;
+            end;
+          spHSYN:
+            begin
+              RowNum := RowNum + 2;
+
+              MaxX := xPos;
+
+              OnNewRow(Pointer(aRowData), RowNum, MaxX, lastRowsValues);
+
+              xPos := 0;
+            end;
+        end;
 
     end;
-     Inc(fCurrentPosInBytes);
-     Inc(i);
-    end;
+    Inc(fCurrentPosInBytes);
+    Inc(i);
+  end;
 
 end;
 
-procedure TOSCTV.SetOnDebug(const Value: TOnDebug);
-begin
-  FOnDebug := Value;
-end;
-
-procedure TOSCTV.SetOnNewFrame(const Value: TNotifyEvent);
-begin
-  FOnNewFrame := Value;
-end;
-
-procedure TOSCTV.SetOnNewRow(Value : TRowEvent);
-begin
-  FOnNewRow := Value;
-end;
-
-function TOSCTV.StatusAsString(OSCTVstatus: TOSCTVstatus): String;
+function StatusAsString(OSCTVstatus: TOSCTVstatus): String;
 begin
   case OSCTVstatus of
-  osWaitFirstFrame : result:='osWaitFirstFrame';
-  osWaitNewFrame: result:='osWaitNewFrame';
-  osWaitEndRow: result:='osWaitEndRow';
-  osWaitStartRowOrFrame : result:='osWaitStartRowOrFrame';
+    osWaitFirstFrame:
+      result := 'osWaitFirstFrame';
+    osWaitNewFrame:
+      result := 'osWaitNewFrame';
+    osWaitEndRow:
+      result := 'osWaitEndRow';
+    osWaitStartRowOrFrame:
+      result := 'osWaitStartRowOrFrame';
   end;
 end;
 
-function TOSCTV.VoltToColor(Volt: Double): Byte;
+function VoltToColor(Volt: Double): Byte;
 var
-  delta, rs : double;
-begin                     // MinVoltageLevel
+  delta, rs: Double;
+begin // MinVoltageLevel
 
-  delta:= (MaxVoltageLevel + Abs(MinVoltageLevel))/ ColorVoltageDelta;
-  Volt := Abs(MinVoltageLevel -Volt) - delta;
-  if Volt < 0 then Volt:=0;
-  Volt:=Volt*ColorVoltageGain;
+  delta := (MaxVoltageLevel + Abs(MinVoltageLevel)) / ColorVoltageDelta;
+  Volt := Abs(MinVoltageLevel - Volt) - delta;
+  if Volt < 0 then
+    Volt := 0;
+  Volt := Volt * ColorVoltageGain;
   {
-  DebugStr:=Format('Range: %.3f;',[MaxVoltageLevel + Abs(MinVoltageLevel)]);
-  DebugStr:=Format('%sDelta: %.3f;',[DebugStr,delta]);
-  DebugStr:=Format('%sVolt: %.3f',[DebugStr,Volt]);
+    DebugStr:=Format('Range: %.3f;',[MaxVoltageLevel + Abs(MinVoltageLevel)]);
+    DebugStr:=Format('%sDelta: %.3f;',[DebugStr,delta]);
+    DebugStr:=Format('%sVolt: %.3f',[DebugStr,Volt]);
 
   }
-  rs:=255 * Volt / (MaxVoltageLevel + Abs(MinVoltageLevel));
-  if rs>255 then rs:=255;
-  if rs<0 then rs:=0;
-  Result:=Ceil(rs)
+  rs := 255 * Volt / (MaxVoltageLevel + Abs(MinVoltageLevel));
+  if rs > 255 then
+    rs := 255;
+  if rs < 0 then
+    rs := 0;
+  result := Ceil(rs)
 
 end;
 

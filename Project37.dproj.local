@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2023.12.01 12:03:22.547,=C:\Users\rodni\Documents\Embarcadero\Studio\Projects\Unit31.pas</Transaction>
+    <Transaction>2023.12.01 12:04:00.158,=C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\vdsolib.pas</Transaction>
+    <Transaction>2023.12.01 12:04:07.385,C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\Unit31.pas=C:\Users\rodni\Documents\Embarcadero\Studio\Projects\Unit31.pas</Transaction>
+    <Transaction>2023.12.01 12:04:07.385,C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\Unit31.dfm=C:\Users\rodni\Documents\Embarcadero\Studio\Projects\Unit31.dfm</Transaction>
+    <Transaction>2023.12.01 12:04:09.982,C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\Project37.dproj=C:\Users\rodni\Documents\Embarcadero\Studio\Projects\Project37.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

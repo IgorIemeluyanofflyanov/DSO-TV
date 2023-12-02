@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{13862AE7-9BF4-478D-B8F0-66D93430733B}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="oscst_NEW_DLL.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\OLD\oscst.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="oscst_NEW_DLL">
+        <MSBuild Projects="oscst_NEW_DLL.dproj"/>
+    </Target>
+    <Target Name="oscst_NEW_DLL:Clean">
+        <MSBuild Projects="oscst_NEW_DLL.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="oscst_NEW_DLL:Make">
+        <MSBuild Projects="oscst_NEW_DLL.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="oscst">
+        <MSBuild Projects="..\OLD\oscst.dproj"/>
+    </Target>
+    <Target Name="oscst:Clean">
+        <MSBuild Projects="..\OLD\oscst.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="oscst:Make">
+        <MSBuild Projects="..\OLD\oscst.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="oscst_NEW_DLL;oscst"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="oscst_NEW_DLL:Clean;oscst:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="oscst_NEW_DLL:Make;oscst:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

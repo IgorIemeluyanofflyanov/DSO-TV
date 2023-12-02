@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.334,C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\oscst_NEW_DLL.dproj=C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\oscst.dproj</Transaction>
+  </Transactions>
+	<ProjectSortOrder AutoSort="0" SortType="0">
+    <File Path="uOSCmain.pas"/>
+    <File Path="uOSCmain.dfm"/>
+    <File Path="uOSCReader.pas"/>
+    <File Path="uOSCTV.pas"/>
+    <File Path="vdsolib.pas"/>
+  </ProjectSortOrder>
+</BorlandProject>
