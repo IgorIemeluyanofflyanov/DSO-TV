@@ -65,42 +65,6 @@ object FormuOSCR: TFormuOSCR
       TabOrder = 0
       OnClick = lst1Click
     end
-    object btnReadGraph: TButton
-      Left = 176
-      Top = 16
-      Width = 75
-      Height = 25
-      Caption = 'read device'
-      TabOrder = 1
-      OnClick = btnReadGraphClick
-    end
-    object btnStop: TButton
-      Left = 176
-      Top = 47
-      Width = 75
-      Height = 25
-      Caption = 'stop device'
-      TabOrder = 2
-      OnClick = btnStopClick
-    end
-    object btnReadTV: TButton
-      Left = 257
-      Top = 17
-      Width = 75
-      Height = 25
-      Caption = 'read TV'
-      TabOrder = 3
-      OnClick = btnReadTVClick
-    end
-    object btnStopTV: TButton
-      Left = 257
-      Top = 48
-      Width = 75
-      Height = 25
-      Caption = 'stop TV'
-      TabOrder = 4
-      OnClick = btnStopTVClick
-    end
     object tbGain: TTrackBar
       Left = 560
       Top = 16
@@ -109,7 +73,7 @@ object FormuOSCR: TFormuOSCR
       Max = 50
       Min = 1
       Position = 30
-      TabOrder = 5
+      TabOrder = 1
       OnChange = tbDeltaChange
     end
     object tbDelta: TTrackBar
@@ -120,7 +84,7 @@ object FormuOSCR: TFormuOSCR
       Max = 50
       Min = 1
       Position = 30
-      TabOrder = 6
+      TabOrder = 2
       OnChange = tbDeltaChange
     end
     object TrackBar1: TTrackBar
@@ -131,7 +95,7 @@ object FormuOSCR: TFormuOSCR
       Min = -10
       Orientation = trVertical
       Position = 1
-      TabOrder = 7
+      TabOrder = 3
     end
     object TrackBar2: TTrackBar
       Left = 778
@@ -141,15 +105,15 @@ object FormuOSCR: TFormuOSCR
       Max = 1000
       Min = 1
       Position = 10
-      TabOrder = 8
+      TabOrder = 4
     end
     object ComboBoxChannelRange: TComboBox
-      Left = 352
-      Top = 35
+      Left = 289
+      Top = 17
       Width = 73
       Height = 21
       ItemIndex = 5
-      TabOrder = 9
+      TabOrder = 5
       Text = '5000'
       OnChange = ComboBoxChannelRangeChange
       Items.Strings = (
@@ -161,12 +125,12 @@ object FormuOSCR: TFormuOSCR
         '5000')
     end
     object CheckBoxACDC: TCheckBox
-      Left = 448
-      Top = 37
+      Left = 387
+      Top = 19
       Width = 65
       Height = 17
       Caption = 'AC/DC'
-      TabOrder = 10
+      TabOrder = 6
       OnClick = CheckBoxACDCClick
     end
     object ButtonFinishDll: TButton
@@ -175,7 +139,7 @@ object FormuOSCR: TFormuOSCR
       Width = 97
       Height = 25
       Caption = 'FinishDll'
-      TabOrder = 11
+      TabOrder = 7
       OnClick = ButtonFinishDllClick
     end
     object ButtonResetDevice: TButton
@@ -184,7 +148,7 @@ object FormuOSCR: TFormuOSCR
       Width = 97
       Height = 25
       Caption = 'ResetDevice'
-      TabOrder = 12
+      TabOrder = 8
       OnClick = ButtonResetDeviceClick
     end
     object TrackBarY: TTrackBar
@@ -194,7 +158,25 @@ object FormuOSCR: TFormuOSCR
       Height = 68
       Min = -10
       Orientation = trVertical
-      TabOrder = 13
+      TabOrder = 9
+    end
+    object CheckBoxTV: TCheckBox
+      Left = 290
+      Top = 62
+      Width = 97
+      Height = 17
+      Caption = 'Capture TV'
+      TabOrder = 10
+      OnClick = CheckBoxTVClick
+    end
+    object CheckBoxGraph: TCheckBox
+      Left = 290
+      Top = 85
+      Width = 97
+      Height = 17
+      Caption = 'Capture Graph'
+      TabOrder = 11
+      OnClick = CheckBoxGraphClick
     end
   end
   object Memo1: TMemo

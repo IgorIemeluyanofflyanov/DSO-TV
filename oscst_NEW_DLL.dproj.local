@@ -3,7 +3,7 @@
 	<Transactions>
     <Transaction>1899.12.30 00:00:00.000.093,C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\NEW\uOSCReader.pas=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.081,C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\NEW\uOSCTV.pas=</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.334,C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\oscst_NEW_DLL.dproj=C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\oscst.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.334,C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\oscst.dproj=C:\qqq\Emerald5\source\d2xxdemoproject\ISDS206b\DLLTEST\oscst_NEW_DLL.dproj</Transaction>
   </Transactions>
 	<ProjectSortOrder AutoSort="0" SortType="0">
     <File Path="uOSCmain.pas"/>
