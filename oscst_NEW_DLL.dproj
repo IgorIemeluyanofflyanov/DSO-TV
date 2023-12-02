@@ -107,8 +107,6 @@
         <DCCReference Include="uOSCmain.pas">
             <Form>FormuOSCR</Form>
         </DCCReference>
-        <DCCReference Include="uOSCReader.pas"/>
-        <DCCReference Include="uOSCTV.pas"/>
         <DCCReference Include="vdsolib.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>

@@ -50,7 +50,7 @@ object FormuOSCR: TFormuOSCR
     Align = alTop
     TabOrder = 0
     object Label1: TLabel
-      Left = 856
+      Left = 784
       Top = 59
       Width = 31
       Height = 13
@@ -74,14 +74,14 @@ object FormuOSCR: TFormuOSCR
       TabOrder = 1
       OnClick = btnReadGraphClick
     end
-    object btn3: TButton
+    object btnStop: TButton
       Left = 176
       Top = 47
       Width = 75
       Height = 25
       Caption = 'stop device'
       TabOrder = 2
-      OnClick = btn3Click
+      OnClick = btnStopClick
     end
     object btnReadTV: TButton
       Left = 257
@@ -92,14 +92,14 @@ object FormuOSCR: TFormuOSCR
       TabOrder = 3
       OnClick = btnReadTVClick
     end
-    object btn6: TButton
+    object btnStopTV: TButton
       Left = 257
       Top = 48
       Width = 75
       Height = 25
       Caption = 'stop TV'
       TabOrder = 4
-      OnClick = btn6Click
+      OnClick = btnStopTVClick
     end
     object tbGain: TTrackBar
       Left = 560
@@ -124,19 +124,19 @@ object FormuOSCR: TFormuOSCR
       OnChange = tbDeltaChange
     end
     object TrackBar1: TTrackBar
-      Left = 952
-      Top = 12
-      Width = 150
-      Height = 29
-      Max = 100
-      Min = 1
+      Left = 1048
+      Top = 17
+      Width = 29
+      Height = 80
+      Min = -10
+      Orientation = trVertical
       Position = 1
       TabOrder = 7
     end
     object TrackBar2: TTrackBar
-      Left = 952
-      Top = 54
-      Width = 150
+      Left = 778
+      Top = 78
+      Width = 233
       Height = 29
       Max = 1000
       Min = 1
@@ -187,11 +187,20 @@ object FormuOSCR: TFormuOSCR
       TabOrder = 12
       OnClick = ButtonResetDeviceClick
     end
+    object TrackBarY: TTrackBar
+      Left = 1100
+      Top = 17
+      Width = 29
+      Height = 68
+      Min = -10
+      Orientation = trVertical
+      TabOrder = 13
+    end
   end
   object Memo1: TMemo
-    Left = 856
+    Left = 778
     Top = 8
-    Width = 65
+    Width = 137
     Height = 45
     Lines.Strings = (
       'Memo1')
@@ -274,9 +283,6 @@ object FormuOSCR: TFormuOSCR
     Height = 212
     Align = alRight
     TabOrder = 3
-    ExplicitLeft = 488
-    ExplicitTop = 1
-    ExplicitHeight = 210
     object CheckBoxTrigger: TCheckBox
       Left = 32
       Top = 6
@@ -339,10 +345,5 @@ object FormuOSCR: TFormuOSCR
         OnChange = SpinEditTriggerLevelChange
       end
     end
-  end
-  object odmain: TOpenDialog
-    Filter = '*.osc|*.osc'
-    Left = 112
-    Top = 128
   end
 end
